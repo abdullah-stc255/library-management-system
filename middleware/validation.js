@@ -198,3 +198,74 @@ export function updateBookStatusValidation(isActive) {
   }
   return error;
 }
+
+// ==============================================================
+//                 Members Validation
+// ==============================================================
+export function createMemberValidation({
+  name,
+  email,
+  phone,
+  address,
+  activeBorrowCount,
+  isActive,
+}) {
+  const error = [];
+  if (!name || name.toString().trim() === "") {
+    error.push({
+      field: "name",
+      message: "Name is required",
+    });
+  }
+
+  if (!email || email.toString().trim() === "") {
+    error.push({
+      field: "Email",
+      message: "Email is required",
+    });
+  }
+
+  if (!phone || phone.toString().trim() === "") {
+    error.push({
+      field: "phone",
+      message: "Phone Number is required",
+    });
+  }
+
+  if (!address || address.toString().trim() === "") {
+    error.push({
+      field: "address",
+      message: "Address is required",
+    });
+  }
+
+  if (activeBorrowCount !== undefined) {
+    const parsedCopies = Number(activeBorrowCount);
+    if (isNaN(parsedCopies)) {
+      error.push({
+        field: "activeBorrowCount",
+        message: "Active Borrow Count must be a type Number",
+      });
+    } else if (parsedCopies < 0) {
+      error.push({
+        field: "activeBorrowCount",
+        message: "Active borrow count cannot be negative",
+      });
+    } else if (activeBorrowCount > 3) {
+      error.push({
+        field: "activeBorrowCount",
+        message: "Active borrow count should not exceed 3",
+      });
+    }
+  }
+
+  if (isActive !== undefined) {
+    if (typeof isActive !== "boolean") {
+      error.push({
+        field: "isActive",
+        message: "Is Active should be boolean",
+      });
+    }
+  }
+  return error;
+}
