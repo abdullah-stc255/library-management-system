@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import {
   booksValidation,
   bookUpdateValidation,
+  updateBookStatusValidation,
 } from "../middleware/validation.js";
 import Book from "../models/book.models.js";
 
@@ -205,6 +206,57 @@ export async function searchBooks(req, res) {
     res.status(200).json({
       success: true,
       data: books,
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function updateBookStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+    const isValid = mongoose.Types.ObjectId.isValid(id);
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Id is not valid",
+      });
+    }
+
+    const error = updateBookStatusValidation(isActive);
+    if (error.length) {
+      return res.status(400).json({
+        success: false,
+        message: error,
+      });
+    }
+
+    let book = await Book.findById(id);
+    if (book.isActive === isActive) {
+      return res.status(400).json({
+        success: false,
+        message: `Book is already ${isActive ? "Active" : "Inactive"} state`,
+      });
+    }
+    const issuedBook = book.totalCopies - book.availableCopies;
+    if (issuedBook > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot deactivate. ${issuedBook} copy/copies of this book are currently issued`,
+      });
+    }
+
+    book.isActive = isActive;
+    book.save();
+    res.status(200).json({
+      success: true,
+      message: `Book ${isActive ? "activated" : "deactivated"} successfully`,
+      data: book,
     });
   } catch (error) {
     console.log("error", error);

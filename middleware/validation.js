@@ -161,6 +161,40 @@ export function bookUpdateValidation(body) {
     }
   }
 
+  const allowedField = [
+    "title",
+    "author",
+    "isbn",
+    "totalCopies",
+    "availableCopies",
+    "isActive",
+    "genre",
+  ];
+
+  const hasValidField = allowedField.some((field) => body[field] !== undefined);
+  if (!hasValidField) {
+    error.push({
+      field: "body",
+      message: "At least one field must be provided to update",
+    });
+  }
+
   console.log(body);
+  return error;
+}
+
+export function updateBookStatusValidation(isActive) {
+  let error = [];
+  if (isActive === undefined || isActive === null) {
+    error.push({
+      field: "isActive",
+      message: "IsActive field is required",
+    });
+  } else if (typeof isActive !== "boolean") {
+    error.push({
+      field: "isActive",
+      message: "IsActive should be type boolean",
+    });
+  }
   return error;
 }
