@@ -199,7 +199,7 @@ export function updateBookStatusValidation(isActive) {
 }
 
 export function searchBooksValidation(body) {
-  const errors = [];
+  const error = [];
   if (body.title !== undefined) {
     if (body.title.toString().trim() === "") {
       error.push({
@@ -234,7 +234,7 @@ export function searchBooksValidation(body) {
       });
     }
   }
-  return errors;
+  return error;
 }
 
 // ==============================================================
@@ -475,5 +475,22 @@ export function searchMembersValidation(body) {
     }
   }
 
+  return error;
+}
+
+export function updateMemberStatusValidation(isActive) {
+  let error = [];
+  console.log(isActive);
+  if (isActive === undefined || isActive === null) {
+    error.push({
+      field: "isActive",
+      message: "IsActive field is required",
+    });
+  } else if (typeof isActive !== "boolean") {
+    error.push({
+      field: "isActive",
+      message: "IsActive should be type boolean",
+    });
+  }
   return error;
 }

@@ -3,6 +3,7 @@ import {
   createMemberValidation,
   searchMembersValidation,
   updateMemberValidation,
+  updateMemberStatusValidation,
 } from "../middleware/validation.js";
 import Member from "../models/member.models.js";
 
@@ -190,6 +191,60 @@ export async function searchMembers(req, res) {
     res.status(200).json({
       success: true,
       data: members,
+    });
+  } catch (error) {
+    console.log("error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function updateMemberStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const isValid = mongoose.Types.ObjectId.isValid(id);
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+    }
+    const { isActive } = req.body;
+    const errors = updateMemberStatusValidation(isActive);
+    if (errors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: errors,
+      });
+    }
+
+    const member = await Member.findById(id);
+    if (!member) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found",
+      });
+    }
+    if (isActive === member.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: `Member is already ${isActive ? "Active" : "Inactive"}`,
+      });
+    }
+    if (!isActive && member.activeBorrowCount > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Can not deactivate use has ${member.activeBorrowCount} borrowed`,
+      });
+    }
+    member.isActive = isActive;
+    member.save();
+    res.status(200).json({
+      success: true,
+      message: "Status updated successfully",
+      data: member,
     });
   } catch (error) {
     console.log("error:", error);
