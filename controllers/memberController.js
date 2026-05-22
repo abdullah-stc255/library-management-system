@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import {
   createMemberValidation,
+  searchMembersValidation,
   updateMemberValidation,
 } from "../middleware/validation.js";
 import Member from "../models/member.models.js";
@@ -144,6 +145,51 @@ export async function getMemberById(req, res) {
     res.status(200).json({
       success: true,
       data: member,
+    });
+  } catch (error) {
+    console.log("error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function searchMembers(req, res) {
+  try {
+    const { name, phone, email, isActive } = req.query;
+    // const errors = searchMembersValidation(req.body);
+    // if (errors.length > 0) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: errors,
+    //   });
+    // }
+    let query = {};
+    if (name !== undefined) {
+      query.name = { $regex: name.trim(), $options: "i" };
+    }
+    if (email !== undefined) {
+      query.email = { $regex: email.trim(), $options: "i" };
+    }
+    if (phone !== undefined) {
+      query.phone = { $regex: phone.trim(), $options: "i" };
+    }
+    if (isActive !== undefined) {
+      if (isActive === "true") query.isActive = true;
+      else query.isActive = false;
+    }
+    console.log(query);
+    const members = await Member.find(query).sort({ createdAt: -1 });
+    if (!members) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      data: members,
     });
   } catch (error) {
     console.log("error:", error);

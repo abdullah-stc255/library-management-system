@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import {
   booksValidation,
   bookUpdateValidation,
+  searchBooksValidation,
   updateBookStatusValidation,
 } from "../middleware/validation.js";
 import Book from "../models/book.models.js";
@@ -185,6 +186,7 @@ export async function getBookById(req, res) {
 export async function searchBooks(req, res) {
   try {
     const { title, author, genre, isActive } = req.query;
+    // const errors = searchBooksValidation(req.body);
     let query = {};
 
     if (title) {
@@ -203,6 +205,12 @@ export async function searchBooks(req, res) {
     }
 
     let books = await Book.find(query).sort({ createdAt: -1 });
+    if (!books) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found",
+      });
+    }
     res.status(200).json({
       success: true,
       data: books,

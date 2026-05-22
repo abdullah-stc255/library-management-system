@@ -198,6 +198,45 @@ export function updateBookStatusValidation(isActive) {
   return error;
 }
 
+export function searchBooksValidation(body) {
+  const errors = [];
+  if (body.title !== undefined) {
+    if (body.title.toString().trim() === "") {
+      error.push({
+        field: "title",
+        message: "Title cannot be empty",
+      });
+    }
+  }
+  if (body.author !== undefined) {
+    if (body.author.toString().trim() === "") {
+      error.push({
+        field: "author",
+        message: "Author cannot be empty",
+      });
+    }
+  }
+
+  if (body.isActive !== undefined) {
+    if (typeof body.isActive !== "boolean") {
+      error.push({
+        field: "isActive",
+        message: "Is Active should be boolean",
+      });
+    }
+  }
+
+  if (body.genre !== undefined) {
+    if (typeof body.genre !== "string" || body.genre.toString().trim() === "") {
+      error.push({
+        field: "genre",
+        message: "Genre must not be empty.",
+      });
+    }
+  }
+  return errors;
+}
+
 // ==============================================================
 //                 Members Validation
 // ==============================================================
@@ -385,6 +424,55 @@ export function updateMemberValidation(body) {
       field: "body",
       message: "At least one field must be provided to update",
     });
+  }
+
+  return error;
+}
+
+export function searchMembersValidation(body) {
+  let error = [];
+  if (body.name !== undefined) {
+    if (body.name.toString().trim() === "") {
+      error.push({
+        field: "name",
+        message: "Name is required",
+      });
+    }
+  }
+  if (body.email !== undefined) {
+    if (body.email.toString().trim() === "") {
+      error.push({
+        field: "email",
+        message: "Email is required",
+      });
+    } else if (!isValidEmail(body.email)) {
+      error.push({
+        field: "email",
+        message: "Invalid email",
+      });
+    }
+  }
+  if (body.phone !== undefined) {
+    if (body.phone.toString().trim() === "") {
+      error.push({
+        field: "phone",
+        message: "Phone Number is required",
+      });
+    } else if (!isValidPhone(body.phone)) {
+      error.push({
+        field: "phone",
+        message: "Invalid phone number",
+      });
+    }
+  }
+  if (body.isActive !== undefined) {
+    if (!body.isActive || body.isActive === null) {
+    } else if (typeof body.isActive !== "boolean") {
+      error.push({
+        field: "isActive",
+        message: "Is Active should be boolean",
+      });
+    }
   }
 
   return error;
