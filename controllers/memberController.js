@@ -86,3 +86,39 @@ export async function updateMember(req, res) {
     });
   }
 }
+
+export async function getMembers(req, res) {
+  try {
+    let { page, limit } = req.query;
+    if (!page || page < 1) page = 1;
+    if (!limit || limit < 1 || limit > 50) limit = 10;
+    const skip = (page - 1) * limit;
+    const membersCount = await Member.countDocuments();
+    const totalPages = Math.ceil(membersCount / limit);
+    const members = await Member.find().skip(skip).limit(limit);
+
+    if (!members) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      pagination: {
+        membersCount,
+        page,
+        limit,
+        totalPages,
+      },
+      data: members,
+    });
+  } catch (error) {
+    console.log("error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
