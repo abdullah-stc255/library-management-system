@@ -260,12 +260,12 @@ export function createMemberValidation({
     });
   }
 
-  if (!address || address.toString().trim() === "") {
-    error.push({
-      field: "address",
-      message: "Address is required",
-    });
-  }
+  // if (!address || address.toString().trim() === "") {
+  //   error.push({
+  //     field: "address",
+  //     message: "Address is required",
+  //   });
+  // }
 
   if (activeBorrowCount !== undefined) {
     const parsedCopies = Number(activeBorrowCount);

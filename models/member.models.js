@@ -13,13 +13,12 @@ const memberSchema = new mongoose.Schema(
       lowercase: true,
     },
     phone: {
-      type: Number,
-      require: [true, "Number is required"],
+      type: String,
+      require: [true, "Phone number is required"],
       unique: true,
     },
     address: {
       type: String,
-      required: [true, "Address is required"],
     },
     activeBorrowCount: {
       type: Number,
