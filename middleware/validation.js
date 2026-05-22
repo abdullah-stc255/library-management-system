@@ -164,7 +164,6 @@ export function bookUpdateValidation(body) {
   const allowedField = [
     "title",
     "author",
-    "isbn",
     "totalCopies",
     "availableCopies",
     "isActive",
@@ -269,7 +268,12 @@ export function createMemberValidation({
 
   if (activeBorrowCount !== undefined) {
     const parsedCopies = Number(activeBorrowCount);
-    if (isNaN(parsedCopies)) {
+    if (activeBorrowCount === "" || activeBorrowCount === null) {
+      error.push({
+        field: "activeBorrowCount",
+        message: "Active borrow count should not empty",
+      });
+    } else if (isNaN(parsedCopies)) {
       error.push({
         field: "activeBorrowCount",
         message: "Active Borrow Count must be a type Number",
@@ -295,5 +299,93 @@ export function createMemberValidation({
       });
     }
   }
+  return error;
+}
+
+export function updateMemberValidation(body) {
+  let error = [];
+  if (body.name !== undefined) {
+    if (body.name.toString().trim() === "") {
+      error.push({
+        field: "name",
+        message: "Name is required",
+      });
+    }
+  }
+  if (body.email !== undefined) {
+    if (body.email.toString().trim() === "") {
+      error.push({
+        field: "email",
+        message: "Email is required",
+      });
+    } else if (!isValidEmail(body.email)) {
+      error.push({
+        field: "email",
+        message: "Invalid email",
+      });
+    }
+  }
+  if (body.phone !== undefined) {
+    if (body.phone.toString().trim() === "") {
+      error.push({
+        field: "phone",
+        message: "Phone Number is required",
+      });
+    } else if (!isValidPhone(body.phone)) {
+      error.push({
+        field: "phone",
+        message: "Invalid phone number",
+      });
+    }
+  }
+  // if (body.address !== undefined) {
+  //   if (body.address.trim() === "") {
+  //     error.push({
+  //       field: "address",
+  //       message: "Address can't be empty",
+  //     });
+  //   }
+  // }
+  if (body.activeBorrowCount !== undefined) {
+    const parsedCopies = Number(body.activeBorrowCount);
+    if (body.activeBorrowCount === "" || body.activeBorrowCount === null) {
+      error.push({
+        field: "activeBorrowCount",
+        message: "Active borrow count should not be empty",
+      });
+    } else if (isNaN(parsedCopies)) {
+      error.push({
+        field: "activeBorrowCount",
+        message: "Active Borrow Count must be a type Number",
+      });
+    } else if (parsedCopies < 0) {
+      error.push({
+        field: "activeBorrowCount",
+        message: "Active borrow count cannot be negative",
+      });
+    } else if (body.activeBorrowCount > 3) {
+      error.push({
+        field: "activeBorrowCount",
+        message: "Active borrow count should not exceed 3",
+      });
+    }
+  }
+
+  const allowedField = [
+    "name",
+    "phone",
+    "email",
+    "address",
+    "activeBorrowCount",
+  ];
+
+  const hasValidField = allowedField.some((field) => body[field] !== undefined);
+  if (!hasValidField) {
+    error.push({
+      field: "body",
+      message: "At least one field must be provided to update",
+    });
+  }
+
   return error;
 }
