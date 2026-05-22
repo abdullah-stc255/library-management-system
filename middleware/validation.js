@@ -202,6 +202,24 @@ export function updateBookStatusValidation(isActive) {
 // ==============================================================
 //                 Members Validation
 // ==============================================================
+
+// Email format validator (basic)
+// ─────────────────────────────────────────────
+const isValidEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// ─────────────────────────────────────────────
+// Phone format validator
+// Allows: digits, spaces, +, -, ()
+// Min 7 digits, Max 15 digits
+// ─────────────────────────────────────────────
+const isValidPhone = (phone) => {
+  const digitsOnly = String(phone).replace(/[\s\-\+\(\)]/g, "");
+  return /^\d{7,15}$/.test(digitsOnly);
+};
+// ==========================================================
 export function createMemberValidation({
   name,
   email,
@@ -223,12 +241,22 @@ export function createMemberValidation({
       field: "Email",
       message: "Email is required",
     });
+  } else if (!isValidEmail(email)) {
+    error.push({
+      field: "email",
+      message: "Invalid email",
+    });
   }
 
   if (!phone || phone.toString().trim() === "") {
     error.push({
       field: "phone",
       message: "Phone Number is required",
+    });
+  } else if (!isValidPhone(phone)) {
+    error.push({
+      field: "phone",
+      message: "Invalid phone number",
     });
   }
 
