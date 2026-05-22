@@ -122,3 +122,34 @@ export async function getMembers(req, res) {
     });
   }
 }
+
+export async function getMemberById(req, res) {
+  try {
+    const { id } = req.params;
+    const isValid = mongoose.Types.ObjectId.isValid(id);
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+    }
+    const member = await Member.findById(id);
+    if (!member) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: member,
+    });
+  } catch (error) {
+    console.log("error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
