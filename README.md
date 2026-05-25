@@ -7,8 +7,8 @@ A RESTful API for managing a library's books, members, and borrow/return operati
 ## Table of Contents
 
 - [Description](#description)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
+<!-- - [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure) -->
 - [Environment Variables](#environment-variables)
 - [Project Setup](#project-setup)
 - [Running the Project](#running-the-project)
