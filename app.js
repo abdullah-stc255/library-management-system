@@ -2,9 +2,9 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
-import bookRoutes from "./routes/bookRouter.js";
+import bookRoutes from "./routes/bookRoute.js";
 import memberRoutes from "./routes/memberRoute.js";
-
+import borrowRoute from "./routes/borrowRoute.js";
 const app = express();
 const PORT = process.env.PORT;
 
@@ -14,6 +14,7 @@ connectDB();
 
 app.use("/books", bookRoutes);
 app.use("/members", memberRoutes);
+app.use("/books", borrowRoute);
 
 app.get("/healthcheck", (req, res) => {
   try {
