@@ -48,7 +48,7 @@ export async function createMember(req, res) {
 export async function updateMember(req, res) {
   try {
     const { id } = req.params;
-    const { isActive, ...updateData } = req.body;
+    const { isActive, activeBorrowCount, ...updateData } = req.body;
     console.log();
     const isValid = mongoose.Types.ObjectId.isValid(id);
     if (!isValid) {
