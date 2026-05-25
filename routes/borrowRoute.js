@@ -1,7 +1,8 @@
 import express from "express";
-import { borrowBook } from "../controllers/borrowBookController.js";
+import { borrowBook, returnBook } from "../controllers/borrowBookController.js";
 const router = express.Router();
 
 router.post("/issue", borrowBook);
+router.post("/:borrowId/return", returnBook);
 
 export default router;

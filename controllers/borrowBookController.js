@@ -18,7 +18,7 @@ export async function borrowBook(req, res) {
     if (!isValidmemberId) {
       return res.status(400).json({
         success: false,
-        message: "Book ID is not valid",
+        message: "Member ID is not valid",
       });
     }
 
@@ -30,12 +30,10 @@ export async function borrowBook(req, res) {
       });
     }
     if (!book.isActive) {
-      if (!book) {
-        return res.status(400).json({
-          success: false,
-          message: "Book Inactive",
-        });
-      }
+      return res.status(400).json({
+        success: false,
+        message: "Book Inactive",
+      });
     }
     if (book.availableCopies < 1) {
       return res.status(400).json({
@@ -75,13 +73,13 @@ export async function borrowBook(req, res) {
       dueDate,
     });
 
-    issueBook.save();
+    await issueBook.save();
 
     book.availableCopies -= 1;
-    book.save();
+    await book.save();
 
     member.activeBorrowCount += 1;
-    member.save();
+    await member.save();
 
     res.status(201).json({
       success: true,
@@ -109,4 +107,95 @@ export async function borrowBook(req, res) {
   }
 }
 
-// TODO: Complete the logic here.
+export async function returnBook(req, res) {
+  try {
+    const { borrowId } = req.params;
+    const isValidId = mongoose.Types.ObjectId.isValid(borrowId);
+    if (!isValidId) {
+      return res.status(400).json({
+        status: false,
+        message: "Id is not valid",
+      });
+    }
+    if (!borrowId || borrowId.trim() === "" || borrowId === null) {
+      return res.status(400).json({
+        status: success,
+        message: "Borrow id is required",
+      });
+    }
+
+    const borrow = await Borrow.findById(borrowId);
+    if (!borrow) {
+      return res.status(404).json({
+        success: false,
+        message: "Borrow record not found",
+      });
+    }
+
+    if (borrow.isReturned) {
+      return res.status(400).json({
+        success: false,
+        message: "This book has already been returned",
+      });
+    }
+
+    const book = await Book.findById(borrow.bookId);
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found",
+      });
+    }
+
+    const member = await Member.findById(borrow.memberId);
+
+    if (!member) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found",
+      });
+    }
+
+    const returnDate = new Date();
+    const isOverdue = returnDate > borrow.dueDate;
+
+    borrow.returnDate = returnDate;
+    borrow.isReturned = true;
+    borrow.isOverdue = isOverdue;
+    await borrow.save();
+
+    book.availableCopies += 1;
+    await book.save();
+
+    if (member.activeBorrowCount > 0) member.activeBorrowCount -= 1;
+    await member.save();
+
+    const MS_PER_DAY = 1000 * 60 * 60 * 24;
+    const daysOverdue = isOverdue
+      ? Math.ceil((returnDate - borrow.dueDate) / MS_PER_DAY)
+      : 0;
+
+    return res.status(200).json({
+      success: true,
+      message: isOverdue
+        ? "Book returned successfully. Note: This return is overdue."
+        : "Book returned successfully",
+      data: {
+        borrowId: borrow._id,
+        member: { id: member._id, name: member.name, email: member.email },
+        book: { id: book._id, title: book.title, isbn: book.isbn },
+        issueDate: borrow.issueDate,
+        dueDate: borrow.dueDate,
+        returnDate: borrow.returnDate,
+        isOverdue,
+        daysOverdue,
+      },
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
