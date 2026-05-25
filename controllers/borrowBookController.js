@@ -199,3 +199,50 @@ export async function returnBook(req, res) {
     });
   }
 }
+
+export async function getMemberHistory(req, res) {
+  try {
+    const { memberId } = req.params;
+    console.log(req.params);
+    console.log("membersID", memberId);
+    if (!memberId || memberId.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "please provide memberId to see the history",
+      });
+    }
+
+    const isValidId = mongoose.Types.ObjectId.isValid(memberId);
+    if (!isValidId) {
+      return res.status(400).json({
+        success: false,
+        message: "Id is not valid",
+      });
+    }
+
+    let member = await Member.findById(memberId);
+    if (!member) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found",
+      });
+    }
+
+    const borrowCount = await Borrow.countDocuments({ memberId });
+    const borrows = await Borrow.find({ memberId })
+      .populate("bookId", "title isbn")
+      .populate("memberId", "name email");
+    console.log("borrowCount", borrowCount);
+
+    return res.status(200).json({
+      success: true,
+      data: borrows,
+    });
+  } catch (error) {
+    console.log("error", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
